@@ -1,0 +1,49 @@
+---
+- name: installing apache and nginx
+  hosts: all
+  become: yes
+
+  vars: 
+    source_file: /root/devops/ansible/index.html
+    destin_file: /var/www/html
+
+
+  tasks:
+  - name: check os 
+    debug: var=ansible_os_family
+
+  - block: #====REDHAT===#
+      - name: installing apache on redhat
+        dnf: name=httpd state=latest 
+        
+      - name: copy html
+        copy: src={{ source_file }} dest={{ destin_file }} mode=0555
+        notify: restart httpd
+
+#      - name restart httpd
+ #       service: name=httpd state=started enabled=yes
+  
+    when: ansible_os_family == "RedHat"
+   
+  - block: #====Ubuntu===#
+      - name: installing nginx
+        apt: name=nginx state=latest
+
+      - name: copy html
+        copy: src={{ source_file }} dest={{ destin_file }} mode=0555
+        notify: restart nginx
+
+#      - name restart nginx
+ #       service: name=nginx.service state=started enabled=yes
+    when: ansible_os_family == "Debian"
+
+   
+
+
+  handlers:
+    
+  - name: restart httpd
+    service: name=httpd state=restarted
+
+  - name: restart nginx
+    service: name=nginx.service state=restarted

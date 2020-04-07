@@ -1,0 +1,48 @@
+---
+- name: check os and install apache
+  hosts: "{{ myhosts }}"
+  become: yes 
+
+  vars:
+     - source_folder: /root/devops/ansible/index
+     - destn_folder: /var/www/html
+
+
+  tasks:
+  - name: check os   
+    debug: var=ansible_os_family
+    
+  - block:
+       - name: installing apache on ubuntu
+         apt: name=apache2 state=latest
+         notify: restart ubuntu
+   
+ 
+       - name: copy file
+         copy: src={{ source_folder }} dest={{ destn_folder }} mode=0644
+
+         notify: restart ubuntu   
+      
+
+    when: ansible_os_family == "Debian"
+   
+  - block:
+      - name: installing apache on redhat
+        yum: name=httpd state=latest 
+
+      - name: copy file
+        copy: src={{ source_folder }} dest={{ destn_folder }} mode=0644
+
+
+
+        notify: restart redhat  
+ 
+    when: ansible_os_family == "RedHat"
+
+  handlers:
+  - name: restart ubuntu
+    service: name=apache2.service state=restarted
+ 
+  - name: restart redhat
+    service: name=httpd state=restarted
+

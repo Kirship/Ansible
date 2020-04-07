@@ -1,0 +1,28 @@
+---
+- name: install apache and upload page
+  hosts: all
+  become: yes
+
+
+
+
+  vars:
+    source_file: ./index.html
+    destin_file: /var/www/html
+  
+
+  tasks:
+  - name: copy my page to server
+    copy: src={{ source_file }} dest={{ destin_file }} mode=0555
+    notify: restart nginx    
+
+
+
+
+  - name: restart nginx
+    service: name=nginx.service state=started 
+
+
+  handlers:
+  - name: restart nginx
+    service: name=nginx.service state=restarted
