@@ -1,0 +1,11 @@
+---
+ - name: nginx
+   hosts: all
+   become: yes
+
+   tasks:
+   - name: install
+     apt:  name=samba state=latest
+  
+   - name: start samba
+     service: name=smbd state=started enabled=yes
