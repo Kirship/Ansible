@@ -1,0 +1,33 @@
+---
+- name: loops
+  hosts: all
+  become: yes
+  
+  vars:
+   mytext: "Hello"
+  
+  tasks:
+  - name: create directory 
+    file:
+     path: /var/test
+     state: directory 
+     mode: 0755
+
+  - name: create file
+    copy:
+     dest: /var/test/hello.txt
+     content: |
+       Texr line1, {{ mytext }}
+  - name: rebooting
+    shell: sleep 3 && reboot now
+    async: 1
+    poll: 0
+
+  - name: waiting starting servers
+    wait_for:
+        host: "{{ inventory_hostname }}"
+        state: started
+        delay: 5
+        timeout: 40
+    delegate_to: 127.0.0.1
+
